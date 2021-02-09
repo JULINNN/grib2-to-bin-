@@ -2,8 +2,8 @@
 
 
 
-
- ####!/bin/tcsh###
+```shell
+ #!/bin/tcsh
   2
 ###set the original time###
   3 set yy=2012
@@ -211,3 +211,4 @@
 203 sst  0 0 sea surface temperature (deg K)
 204 endvars
 205 EOF_SST
+```
