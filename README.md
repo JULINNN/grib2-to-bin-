@@ -216,3 +216,102 @@
 204 endvars
 205 EOF_SST
 ```
+## fortran code
+```shell
+  1 program grib2_to_binary
+###declare variable
+  2 implicit none
+  3
+  4 integer, parameter :: m=51,n=51,zlev=25
+  5 real :: dat,p
+  6 dimension :: dat(m,n),p(zlev)
+  7 integer :: i,j,k,irec,icnt
+  8 character(50) :: finlist,fin,fout0,fout1,fsst
+  9 !!!===     1    2    3    4    5    6    7    8    9   10
+ 10 data p /1000, 975, 950, 925, 900, 850, 800, 750, 700, 650,&
+ 11          600, 550, 500, 450, 400, 350, 300, 250, 200, 150,&
+ 12          100,  70,  50,  30,  20/ !!!,  10/
+ 13 !!!!!!!!!!!!!1234567890   15   20   25   30   35   40   45   50
+ 14 data fout0 /"data.gpv????????????.bin                          "/
+ 15 !data fsst  /"data.sst????????????.bin                          "/
+ 16 !fnl_20120610_00_00.grib2
+ 17 read(*,11)fin
+ 18 11 format(A50)
+ 19 print *,fin
+ 20 fout1(1:50)=fout0(1:50)
+ 21 fout1(9:20)=fin(1:12)
+ 22
+ 23 open(12,file=fin,status="old",form="unformatted",access="direct",recl=m*n*4)
+ 24 open(13,file=fout1,status="unknown",form="unformatted",access="direct",recl=m*n*4)
+ 25 !open(14,file=fsst,status="unknown",form="unformatted",access="direct",recl=m*n*4)
+ 26
+ 27 irec=0
+ 28 icnt=0
+ 29
+ 30 !!! get HGT*zlev, UGRD*zlev, VGRD*zelv, and PRES*1(surface)
+ 31 do k=1,zlev*3
+ 32   irec=irec+1
+ 33   read(12,rec=irec)dat
+ 34   icnt=icnt+1
+ 35   write(13,rec=icnt)dat
+ 36 enddo
+ 37
+ 38 !!! fill presure at each air level (unit: Pa)
+ 39 do k=1,zlev
+ 40   do i=1,m
+ 41     do j=1,n
+ 42       dat(i,j)=p(k)*100.
+ 43     enddo
+44   enddo
+ 45   icnt=icnt+1
+ 46   write(13,rec=icnt)dat
+ 47 enddo
+ 48
+ 49 !!! get TMP*zlev
+ 50 do k=1,zlev
+ 51   irec=irec+1
+ 52   read(12,rec=irec)dat
+ 53   icnt=icnt+1
+ 54   write(13,rec=icnt)dat
+ 55 enddo
+ 56
+ 57 !!! get RH*zlev
+ 58 do k=1,zlev-4
+ 59   irec=irec+1
+ 60   read(12,rec=irec)dat
+ 61   do i=1,m
+ 62     do j=1,n
+ 63       if(dat(i,j) > 100.0)then
+ 64         dat(i,j)=100.0
+ 65       else
+ 66         dat(i,j)=dat(i,j)
+ 67       end if
+ 68     end do
+ 69   end do
+ 70   icnt=icnt+1
+ 71   write(13,rec=icnt)dat
+ 72 enddo
+ 73
+ 74   do k=1,4
+ 75     read(12,rec=irec)dat
+ 76     do i=1,m
+ 77       do j=1,n
+ 78         if(dat(i,j) > 100.0)then
+ 79           dat(i,j)=100.0
+ 80         else
+ 81           dat(i,j)=dat(i,j)
+ 82         end if
+ 83       end do
+ 84     end do
+ 85     icnt=icnt+1
+ 86     write(13,rec=icnt)dat
+ 87   enddo
+ 88
+ 89
+ 90 !close(14)
+ 91 close(13)
+ 92 close(12)
+ 93
+ 94 print *,"!!!FORTRAN THE END!!!"
+ 95 end program grib2_to_binary
+ ```
