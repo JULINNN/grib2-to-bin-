@@ -1,4 +1,4 @@
-# grib2-to-bin
+# grib2 to binary
 ## useful website 
 - [tcsh shell 簡介](http://n.sfs.tw/content/index/11317)
 - [Fortran Tutorial](./doc/fortran.md)
